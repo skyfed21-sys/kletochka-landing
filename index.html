@@ -482,6 +482,121 @@
   footer a { color: #888; text-decoration: none; }
   footer strong { color: var(--gold); font-size: 18px; }
 
+  /* BRAS SECTION */
+  .bras-section {
+    background: linear-gradient(180deg, #fff5f8 0%, white 100%);
+    padding: 80px 20px;
+  }
+  .bras-badge {
+    text-align: center;
+    display: inline-block;
+    background: linear-gradient(135deg, #e91e8c, #c0392b);
+    color: white;
+    padding: 7px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 auto 24px;
+    display: block;
+    width: fit-content;
+  }
+  .bras-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    margin-top: 50px;
+  }
+  @media(max-width:700px) { .bras-grid { grid-template-columns: 1fr; } }
+  .bra-card {
+    background: white;
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(192,57,43,.1);
+    border: 2px solid #fde8ef;
+  }
+  .bra-visual {
+    margin: 0 auto 20px;
+    width: fit-content;
+    filter: drop-shadow(0 10px 24px rgba(192,57,43,.35));
+    animation: float 3s ease-in-out infinite;
+  }
+  .bra-card h3 { font-size: 22px; margin-bottom: 10px; }
+  .bra-card p { color: #666; line-height: 1.6; font-size: 15px; margin-bottom: 20px; }
+  .bra-price-block { margin-bottom: 20px; }
+  .bra-old-price {
+    font-size: 17px; color: #bbb;
+    text-decoration: line-through;
+    margin-right: 10px;
+  }
+  .bra-new-price {
+    font-size: 42px; font-weight: bold;
+    color: #e91e8c;
+  }
+  .btn-bra {
+    display: inline-block;
+    background: linear-gradient(135deg, #e91e8c, #c0392b);
+    color: white;
+    padding: 14px 40px;
+    border-radius: 40px;
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(233,30,140,.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-bra:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(233,30,140,.5); }
+  .bra-features { display: flex; flex-direction: column; gap: 20px; }
+  .bra-feature-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .bra-feature-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+  .bra-feature-item strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .bra-feature-item p { color: #666; font-size: 14px; line-height: 1.5; margin: 0; }
+  .bra-combo-box {
+    background: linear-gradient(135deg, #1a1a1a, #2c1810);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    color: white;
+    margin-top: 10px;
+  }
+  .bra-combo-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e91e8c;
+    margin-bottom: 8px;
+  }
+  .bra-combo-text {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .bra-combo-text strong { color: var(--gold); }
+  .bra-combo-text span { font-size: 14px; color: #888; text-decoration: line-through; }
+  .btn-combo {
+    display: inline-block;
+    background: var(--gold);
+    color: #1a1a1a;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform .2s;
+  }
+  .btn-combo:hover { transform: scale(1.04); }
+  .bra-reviews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 50px;
+  }
+
   /* STICKY CTA */
   .sticky-cta {
     position: fixed;
@@ -523,7 +638,7 @@
 
 <!-- ANNOUNCEMENT -->
 <div class="announcement">
-  🔥 АКЦИЯ: при заказе от 3 штук — СКИДКА 30% + БЕСПЛАТНАЯ ДОСТАВКА 🔥
+  🔥 АКЦИЯ: трусы от 390 ₽ · лифчики от 299 ₽ · комплект пара = 599 ₽ · БЕСПЛАТНАЯ ДОСТАВКА от 3 шт 🔥
 </div>
 
 <!-- HERO -->
@@ -738,6 +853,113 @@
             <strong>Ольга Р.</strong>
             <span>Краснодар, хитрая жена</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAS SECTION -->
+<section class="bras-section">
+  <div class="container">
+    <div class="bras-badge">Новинка для неё ✨</div>
+    <h2 class="section-title">Лифчики в <em>клеточку</em><br>для женской половины семьи</h2>
+    <p class="section-sub">Тот же характер, та же ткань, та же клетка — теперь и для неё. Комфорт без компромиссов.</p>
+
+    <div class="bras-grid">
+      <div class="bra-card">
+        <div class="bra-visual">
+          <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" width="180" height="126">
+            <defs>
+              <pattern id="checkBra" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+                <rect width="16" height="16" fill="#c0392b"/>
+                <rect width="8" height="8" fill="#96281b"/>
+                <rect x="8" y="8" width="8" height="8" fill="#96281b"/>
+              </pattern>
+            </defs>
+            <!-- left cup -->
+            <path d="M20,80 Q15,30 70,25 Q95,22 100,60 Q70,75 20,80 Z" fill="url(#checkBra)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <!-- right cup -->
+            <path d="M180,80 Q185,30 130,25 Q105,22 100,60 Q130,75 180,80 Z" fill="url(#checkBra)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <!-- band -->
+            <path d="M20,80 Q100,90 180,80 L178,95 Q100,106 22,95 Z" fill="url(#checkBra)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <!-- straps -->
+            <line x1="55" y1="25" x2="40" y2="5" stroke="rgba(192,57,43,0.8)" stroke-width="3" stroke-linecap="round"/>
+            <line x1="145" y1="25" x2="160" y2="5" stroke="rgba(192,57,43,0.8)" stroke-width="3" stroke-linecap="round"/>
+            <!-- center bow -->
+            <circle cx="100" cy="60" r="5" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
+        <h3>Бюстгальтер «Клеточка»</h3>
+        <p>Мягкая чашечка без косточек, хлопок 100%, широкий ремешок — носится как вторая кожа. Размеры 70A–95D.</p>
+        <div class="bra-price-block">
+          <span class="bra-old-price">590 ₽</span>
+          <span class="bra-new-price">299 ₽</span>
+        </div>
+        <a href="#order" class="btn-bra">Заказать</a>
+      </div>
+
+      <div class="bra-features">
+        <div class="bra-feature-item">
+          <span class="bra-feature-icon">🌸</span>
+          <div>
+            <strong>Без косточек</strong>
+            <p>Анатомическая форма держит без давления и дискомфорта весь день.</p>
+          </div>
+        </div>
+        <div class="bra-feature-item">
+          <span class="bra-feature-icon">🧶</span>
+          <div>
+            <strong>100% хлопок</strong>
+            <p>Та же фабрика, та же нить — кожа дышит, никакого синтетика.</p>
+          </div>
+        </div>
+        <div class="bra-feature-item">
+          <span class="bra-feature-icon">📐</span>
+          <div>
+            <strong>Размеры 70A–95D</strong>
+            <p>Большая размерная сетка. Регулируемые бретельки и застёжка на 3 крючка.</p>
+          </div>
+        </div>
+        <div class="bra-feature-item">
+          <span class="bra-feature-icon">💝</span>
+          <div>
+            <strong>Подходит в подарок</strong>
+            <p>Красивая коробка, дискретная доставка — идеальный намёк на юмор и уют.</p>
+          </div>
+        </div>
+        <div class="bra-combo-box">
+          <div class="bra-combo-label">🔥 Комплект «Семейная клетка»</div>
+          <div class="bra-combo-text">Трусы + Лифчик = <strong>599 ₽</strong> <span>вместо 689 ₽</span></div>
+          <a href="#order" class="btn-combo">Взять комплект</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews for bras -->
+    <div class="bra-reviews">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">«Муж заказывал трусы, я увидела лифчики — взяла три штуки. Мягче чем всё что у меня было. Клетка смешная, но реально красивая.»</p>
+        <div class="reviewer">
+          <div class="avatar" style="background:linear-gradient(135deg,#c0392b,#8e44ad)">МВ</div>
+          <div class="reviewer-info"><strong>Марина В.</strong><span>Москва, 34 года</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">«Наконец-то нашла без косточек и чтоб не разъезжалось. Беру уже второй раз, теперь брала 2 штуки сразу. За 299 — просто подарок.»</p>
+        <div class="reviewer">
+          <div class="avatar" style="background:linear-gradient(135deg,#c0392b,#8e44ad)">ЕК</div>
+          <div class="reviewer-info"><strong>Екатерина К.</strong><span>Санкт-Петербург, 28 лет</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">«Купили с мужем одинаковые — он трусы, я лифчик. Фотку в клеточку выложили — друзья умерли со смеху. Рекомендую как семейный аттракцион!»</p>
+        <div class="reviewer">
+          <div class="avatar" style="background:linear-gradient(135deg,#c0392b,#8e44ad)">АП</div>
+          <div class="reviewer-info"><strong>Анна П.</strong><span>Казань, весёлая жена</span></div>
         </div>
       </div>
     </div>
