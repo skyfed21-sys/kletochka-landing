@@ -445,24 +445,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="section-body">
             <div id="ghStatus" class="github-status idle">
               <span class="status-dot"></span>
-              <span id="ghStatusText">Не подключён</span>
+              <span id="ghStatusText">Не проверено</span>
             </div>
-            <div class="field-row">
-              <label class="field-label">Personal Access Token <span>(хранится только в браузере)</span></label>
-              <input type="password" id="ghToken" class="field-input" placeholder="ghp_xxxxxxxxxxxx">
-              <p class="hint">Нужен токен с правом на запись в репозиторий. <b>Settings → Developer settings → Personal access tokens → Classic</b>. Разрешения: repo.</p>
+
+            <div class="field-row" style="margin-top:16px;">
+              <label class="field-label">Personal Access Token</label>
+              <div style="display:flex;gap:8px;">
+                <input type="password" id="ghToken" class="field-input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1;">
+                <button class="btn-preview" onclick="testConnection()" id="btnTest" style="white-space:nowrap;flex-shrink:0;">🔌 Проверить</button>
+              </div>
+              <p class="hint" style="margin-top:6px;">
+                Получить токен: github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token.<br>
+                Поставьте галочку <b>repo</b> (полный доступ к репозиторию). Скопируйте токен — он показывается только один раз.
+              </p>
             </div>
+
             <div class="field-grid">
               <div class="field-row">
                 <label class="field-label">Владелец репозитория</label>
-                <input type="text" id="ghOwner" class="field-input" placeholder="skyfed21-sys">
+                <input type="text" id="ghOwner" class="field-input" value="skyfed21-sys">
               </div>
               <div class="field-row">
                 <label class="field-label">Название репозитория</label>
-                <input type="text" id="ghRepo" class="field-input" placeholder="kletochka-landing">
+                <input type="text" id="ghRepo" class="field-input" value="kletochka-landing">
               </div>
             </div>
-            <button class="btn-publish" style="width:auto;" onclick="saveGithubSettings()">Сохранить настройки</button>
+            <button class="btn-publish" style="width:auto;" onclick="saveGithubSettings()">💾 Сохранить настройки</button>
           </div>
         </div>
 
@@ -474,8 +482,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           </div>
           <div class="section-body">
             <p style="color:var(--muted);font-size:14px;margin-bottom:16px;line-height:1.6;">
-              Нажмите кнопку ниже, чтобы сохранить все изменения в GitHub.<br>
-              Сайт обновится автоматически через 1–2 минуты.
+              Сохраняет все изменения в GitHub. Сайт обновится через 1–2 минуты.
             </p>
             <button class="btn-publish" onclick="publishToGitHub()" id="btnPublish2">🚀 Опубликовать на сайт</button>
             <div class="publish-log" id="publishLog"></div>
@@ -636,14 +643,19 @@ function updateGHStatus(type,msg){
   document.getElementById('ghStatusText').textContent=msg;
 }
 
-async function getFileSha(owner,repo,path,token){
-  const r = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-    {headers:{Authorization:'token '+token,'Accept':'application/vnd.github.v3+json'}}
-  );
-  if(!r.ok) return null;
-  const d = await r.json();
-  return d.sha;
+// Encode string to base64 safely (handles Cyrillic + emoji)
+function toBase64(str){
+  return btoa(String.fromCharCode(...new Uint8Array(new TextEncoder().encode(str))));
+}
+
+// Friendly error text by HTTP status
+function ghErrorText(status, message){
+  if(status===401) return '❌ Токен неверный или просрочен (401). Создайте новый токен в GitHub Settings.';
+  if(status===403) return '❌ Нет прав на запись (403). Убедитесь, что у токена выбрано разрешение "repo".';
+  if(status===404) return '❌ Репозиторий не найден (404). Проверьте имя владельца и репозитория.';
+  if(status===409) return '❌ Конфликт версий (409). Попробуйте опубликовать ещё раз.';
+  if(status===422) return '❌ Ошибка данных (422). SHA файла не совпадает — попробуйте ещё раз.';
+  return '❌ Ошибка '+status+': '+message;
 }
 
 function log(msg,type=''){
@@ -656,66 +668,128 @@ function log(msg,type=''){
   box.scrollTop=box.scrollHeight;
 }
 
+async function testConnection(){
+  const token = document.getElementById('ghToken').value.trim();
+  const owner = document.getElementById('ghOwner').value.trim() || localStorage.getItem('gh_owner') || 'skyfed21-sys';
+  const repo  = document.getElementById('ghRepo').value.trim()  || localStorage.getItem('gh_repo')  || 'kletochka-landing';
+  const btn   = document.getElementById('btnTest');
+
+  if(!token || token==='••••••••••••••••'){
+    toast('Введите токен в поле выше','error'); return;
+  }
+
+  btn.textContent='⏳ Проверка...';
+  btn.disabled=true;
+  updateGHStatus('idle','Проверка...');
+
+  try{
+    const r = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/data.json`,
+      {headers:{Authorization:'token '+token,'Accept':'application/vnd.github.v3+json'}}
+    );
+    if(r.status===401){ updateGHStatus('error','Токен неверный (401)'); toast('Токен неверный','error'); return; }
+    if(r.status===403){ updateGHStatus('error','Нет доступа (403) — нужно разрешение repo'); toast('Нет прав repo','error'); return; }
+    if(r.status===404){ updateGHStatus('error','Репозиторий не найден (404)'); toast('Репо не найден','error'); return; }
+    if(!r.ok){ updateGHStatus('error','Ошибка '+r.status); toast('Ошибка '+r.status,'error'); return; }
+    updateGHStatus('ok','Подключён ✓ — '+owner+'/'+repo);
+    toast('Соединение OK ✓','success');
+  } catch(e){
+    updateGHStatus('error','Нет ответа от GitHub: '+e.message);
+    toast('Нет ответа от GitHub','error');
+  } finally {
+    btn.textContent='🔌 Проверить';
+    btn.disabled=false;
+  }
+}
+
 async function publishToGitHub(){
   const gh = getGHSettings();
+
+  // Always switch to GitHub tab so the log is visible
+  switchTab('github');
+
+  const publishLog = document.getElementById('publishLog');
+  publishLog.innerHTML='';
+  publishLog.style.display='block';
+
   if(!gh.token){
-    toast('Сначала укажите GitHub токен во вкладке «GitHub»','error');
-    switchTab('github');
+    log('❌ Токен не задан. Введите GitHub токен в поле выше и нажмите «Проверить».','err');
+    updateGHStatus('error','Токен не задан');
     return;
   }
+
   const btn1=document.getElementById('btnPublish');
   const btn2=document.getElementById('btnPublish2');
   const setDisabled=(v)=>{if(btn1)btn1.disabled=v;if(btn2)btn2.disabled=v;};
   setDisabled(true);
-  document.getElementById('publishLog').innerHTML='';
+  updateGHStatus('idle','Публикация...');
 
   const data = collectData();
   log('📦 Подготовка данных...','info');
 
   try {
-    // Get SHA of existing data.json
-    log('🔍 Получение текущего файла...','info');
-    const sha = await getFileSha(gh.owner,gh.repo,'data.json',gh.token);
+    // Step 1: get SHA of existing file (required for update)
+    log('🔍 Получение SHA файла data.json...','info');
+    const shaResp = await fetch(
+      `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/data.json`,
+      {headers:{Authorization:'token '+gh.token,'Accept':'application/vnd.github.v3+json'}}
+    );
 
-    // Encode content
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+    if(shaResp.status===401){ throw new Error(ghErrorText(401,'')); }
+    if(shaResp.status===403){ throw new Error(ghErrorText(403,'')); }
+    if(shaResp.status===404){ throw new Error(ghErrorText(404,'')); }
 
+    let sha = null;
+    if(shaResp.ok){
+      const shaData = await shaResp.json();
+      sha = shaData.sha;
+      log('✅ SHA получен: '+sha.slice(0,8)+'...','ok');
+    }
+
+    // Step 2: encode content (safe for Cyrillic + emoji)
+    const jsonStr  = JSON.stringify(data, null, 2);
+    const content  = toBase64(jsonStr);
+
+    // Step 3: PUT to GitHub
+    log('🚀 Отправка в GitHub...','info');
     const body = {
-      message: 'Обновление контента через CMS — '+new Date().toLocaleString('ru'),
+      message: 'CMS: обновление контента '+new Date().toLocaleString('ru'),
       content: content
     };
     if(sha) body.sha = sha;
 
-    log('🚀 Отправка изменений в GitHub...','info');
-    const r = await fetch(
+    const putResp = await fetch(
       `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/data.json`,
       {
-        method:'PUT',
-        headers:{
-          Authorization:'token '+gh.token,
-          'Accept':'application/vnd.github.v3+json',
-          'Content-Type':'application/json'
+        method: 'PUT',
+        headers: {
+          Authorization: 'token '+gh.token,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
         },
-        body:JSON.stringify(body)
+        body: JSON.stringify(body)
       }
     );
 
-    if(!r.ok){
-      const err = await r.json();
-      throw new Error(err.message||'Ошибка '+r.status);
+    if(!putResp.ok){
+      let errMsg = 'Ошибка '+putResp.status;
+      try{ const e = await putResp.json(); errMsg = e.message||errMsg; }catch(_){}
+      throw new Error(ghErrorText(putResp.status, errMsg));
     }
 
-    log('✅ data.json успешно обновлён!','ok');
+    log('✅ data.json обновлён на GitHub!','ok');
     log('⏳ Сайт обновится через 1–2 минуты...','info');
     log('🌐 https://'+gh.owner+'.github.io/'+gh.repo+'/','ok');
     updateGHStatus('ok','Опубликовано ✓');
-    toast('Опубликовано! Сайт обновится через ~1 мин ✓','success');
+    toast('Опубликовано ✓  Сайт обновится через ~1 мин','success');
     currentData = data;
+
   } catch(e){
-    log('❌ Ошибка: '+e.message,'err');
-    updateGHStatus('error','Ошибка: '+e.message);
-    toast('Ошибка: '+e.message,'error');
+    log(e.message,'err');
+    updateGHStatus('error','Ошибка публикации');
+    toast('Ошибка — см. лог ниже','error');
   }
+
   setDisabled(false);
 }
 
