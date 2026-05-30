@@ -482,6 +482,117 @@
   footer a { color: #888; text-decoration: none; }
   footer strong { color: var(--gold); font-size: 18px; }
 
+  /* SOCKS SECTION */
+  .socks-section {
+    background: linear-gradient(135deg, #0d0d0d, #1a0a00, #0d0d0d);
+    padding: 0 0 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .socks-section::before {
+    content: '🧦';
+    position: absolute;
+    font-size: 300px;
+    opacity: .03;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .socks-urgency-bar {
+    background: linear-gradient(90deg, #c0392b, #d4a017, #c0392b);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite, urgencyPulse 1s ease-in-out infinite;
+    color: white;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 50px;
+  }
+  .socks-urgency-bar span { font-size: 22px; font-family: monospace; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  @keyframes urgencyPulse { 0%,100%{opacity:1} 50%{opacity:.85} }
+  .socks-badge {
+    text-align: center;
+    display: block;
+    width: fit-content;
+    margin: 0 auto 20px;
+    background: rgba(212,160,23,.15);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 7px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .socks-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  .sock-visual {
+    filter: drop-shadow(0 0 30px rgba(192,57,43,.6));
+    animation: float 2.5s ease-in-out infinite;
+  }
+  .socks-info { max-width: 380px; }
+  .socks-props {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .sock-prop {
+    color: #ccc;
+    font-size: 15px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,.04);
+    border-radius: 8px;
+    border-left: 3px solid var(--red);
+  }
+  .socks-price-block { margin-bottom: 20px; }
+  .socks-old { color: #666; font-size: 15px; text-decoration: line-through; }
+  .socks-new {
+    font-size: 56px;
+    font-weight: bold;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .socks-rub { font-size: 20px; color: #aaa; }
+  .socks-note { color: #666; font-size: 13px; margin-top: 6px; }
+  .btn-socks {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold), #b8860b);
+    color: #1a1a1a;
+    padding: 16px 44px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    text-decoration: none;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 24px rgba(212,160,23,.4);
+    transition: transform .2s, box-shadow .2s;
+    animation: sockPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes sockPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  .btn-socks:hover { box-shadow: 0 10px 32px rgba(212,160,23,.6); }
+  .socks-stock { color: #aaa; font-size: 14px; }
+  .socks-stock strong { color: var(--red); font-size: 20px; }
+  .stock-fire { font-size: 18px; }
+  .socks-disclaimer {
+    max-width: 600px;
+    margin: 40px auto 0;
+    text-align: center;
+    color: #444;
+    font-size: 12px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
   /* BRAS SECTION */
   .bras-section {
     background: linear-gradient(180deg, #fff5f8 0%, white 100%);
@@ -859,6 +970,68 @@
   </div>
 </section>
 
+<!-- SOCKS SECTION -->
+<section class="socks-section">
+  <div class="socks-urgency-bar">
+    ⚡ ВНИМАНИЕ! СУПЕРАКЦИЯ ТОЛЬКО <span id="sockTimer">3:00:00</span> — ПОТОМ ПРОПАДУТ НАВСЕГДА ⚡
+  </div>
+  <div class="container">
+    <div class="socks-badge">🧦 ГОРЯЧЕЕ ПРЕДЛОЖЕНИЕ</div>
+    <h2 class="section-title" style="color:white">БУ Носки<br><em style="color:var(--gold)">с одной дыркой</em></h2>
+    <p class="section-sub" style="color:#aaa">Легендарная партия. Один хозяин. Одна дырка. Один шанс.</p>
+
+    <div class="socks-center">
+      <!-- SVG sock with hole -->
+      <div class="sock-visual">
+        <svg viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" width="140" height="175">
+          <defs>
+            <pattern id="checkSock" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+              <rect width="14" height="14" fill="#c0392b"/>
+              <rect width="7" height="7" fill="#96281b"/>
+              <rect x="7" y="7" width="7" height="7" fill="#96281b"/>
+            </pattern>
+          </defs>
+          <!-- sock body -->
+          <path d="M45,10 L115,10 L115,130 Q115,160 140,170 Q150,175 148,185 Q146,195 130,195 Q80,195 55,170 Q35,150 35,130 L35,10 Z" fill="url(#checkSock)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          <!-- cuff -->
+          <rect x="35" y="10" width="80" height="22" fill="#96281b" rx="3"/>
+          <line x1="35" y1="20" x2="115" y2="20" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <!-- THE hole -->
+          <ellipse cx="95" cy="185" rx="18" ry="10" fill="#1a1a1a" stroke="#d4a017" stroke-width="2" stroke-dasharray="4 2"/>
+          <text x="95" y="189" text-anchor="middle" font-size="9" fill="#d4a017" font-family="Georgia">дырка</text>
+        </svg>
+      </div>
+
+      <div class="socks-info">
+        <div class="socks-props">
+          <div class="sock-prop">✅ Одна дырка (не две)</div>
+          <div class="sock-prop">✅ Б/У — уже разношены за вас</div>
+          <div class="sock-prop">✅ Тот самый запах свободы</div>
+          <div class="sock-prop">✅ Размер 40–45 (примерно)</div>
+          <div class="sock-prop">✅ Клетка присутствует</div>
+          <div class="sock-prop">✅ Второй носок в комплект не входит</div>
+        </div>
+
+        <div class="socks-price-block">
+          <div class="socks-old">до акции: 1 ₽</div>
+          <div class="socks-new">0 ₽<span class="socks-rub"> — БЕСПЛАТНО</span></div>
+          <div class="socks-note">платите только доставку · 399 ₽ · выгода очевидна</div>
+        </div>
+
+        <a href="#order" class="btn-socks">ХОЧУ НОСОК</a>
+
+        <div class="socks-stock">
+          <span class="stock-fire">🔥</span> Осталось: <strong id="stockCount">3</strong> штуки. Торопитесь.
+        </div>
+      </div>
+    </div>
+
+    <div class="socks-disclaimer">
+      * Администрация сайта не несёт ответственности за состояние носка. Дырка является частью дизайна. Возврату не подлежит по санитарным нормам и соображениям здравого смысла.
+    </div>
+  </div>
+</section>
+
 <!-- BRAS SECTION -->
 <section class="bras-section">
   <div class="container">
@@ -1071,6 +1244,25 @@
 </div>
 
 <script>
+  // Sock timer — 3 hours
+  function startSockTimer() {
+    let total = 3 * 3600;
+    const el = document.getElementById('sockTimer');
+    const stock = document.getElementById('stockCount');
+    let stockVal = 3;
+    const interval = setInterval(() => {
+      total--;
+      if (total <= 0) { clearInterval(interval); el.textContent = '00:00:00'; return; }
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      // stock drops every 20 min
+      if (total % 1200 === 0 && stockVal > 1) { stockVal--; stock.textContent = stockVal; }
+    }, 1000);
+  }
+  startSockTimer();
+
   // Countdown timer
   function startTimer() {
     let h = 11, m = 47, s = 33;
