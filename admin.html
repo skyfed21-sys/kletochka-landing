@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КЛЕТОЧКА — Панель управления</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0f0f0f;
+  --panel:#1a1a1a;
+  --border:#2a2a2a;
+  --accent:#c0392b;
+  --gold:#d4a017;
+  --text:#e0e0e0;
+  --muted:#777;
+  --green:#27ae60;
+  --input-bg:#111;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+
+/* LOGIN */
+#loginScreen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:var(--bg);
+}
+.login-box{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:48px 40px;width:100%;max-width:380px;text-align:center;
+}
+.login-logo{font-size:48px;margin-bottom:8px;}
+.login-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+.login-sub{color:var(--muted);font-size:14px;margin-bottom:32px;}
+.login-input{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  color:var(--text);padding:14px 16px;border-radius:8px;font-size:15px;
+  margin-bottom:12px;outline:none;transition:border .2s;
+}
+.login-input:focus{border-color:var(--accent);}
+.btn-login{
+  width:100%;background:var(--accent);color:white;border:none;
+  padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;
+  transition:background .2s;
+}
+.btn-login:hover{background:#a93226;}
+.login-error{color:#e74c3c;font-size:13px;margin-top:10px;display:none;}
+.login-hint{color:var(--muted);font-size:12px;margin-top:16px;}
+
+/* LAYOUT */
+#app{display:none;min-height:100vh;flex-direction:row;}
+.sidebar{
+  width:240px;flex-shrink:0;background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+}
+.sidebar-header{
+  padding:20px;border-bottom:1px solid var(--border);
+}
+.sidebar-logo{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.sidebar-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:8px;cursor:pointer;
+  font-size:14px;color:var(--muted);transition:all .15s;margin-bottom:2px;
+}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nav-item.active{background:rgba(192,57,43,.15);color:var(--accent);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border);}
+.btn-logout{
+  width:100%;background:transparent;border:1px solid var(--border);
+  color:var(--muted);padding:8px;border-radius:6px;cursor:pointer;
+  font-size:13px;transition:all .2s;
+}
+.btn-logout:hover{border-color:var(--accent);color:var(--accent);}
+
+.main{flex:1;overflow-y:auto;}
+.topbar{
+  background:var(--panel);border-bottom:1px solid var(--border);
+  padding:16px 28px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-size:18px;font-weight:600;}
+.topbar-actions{display:flex;gap:10px;}
+.btn-preview{
+  background:transparent;border:1px solid var(--border);color:var(--text);
+  padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;
+  transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-preview:hover{border-color:var(--gold);color:var(--gold);}
+.btn-publish{
+  background:var(--accent);border:none;color:white;
+  padding:8px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;
+  transition:background .2s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-publish:hover{background:#a93226;}
+.btn-publish:disabled{background:#555;cursor:not-allowed;}
+
+.content{padding:28px;max-width:860px;}
+
+/* TABS */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* SECTION */
+.section-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:20px;overflow:hidden;
+}
+.section-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
+}
+.section-head .icon{font-size:18px;}
+.section-head h3{font-size:15px;font-weight:600;flex:1;}
+.section-head .toggle{color:var(--muted);font-size:12px;transition:transform .2s;}
+.section-head.collapsed .toggle{transform:rotate(-90deg);}
+.section-body{padding:20px;}
+.section-body.collapsed{display:none;}
+
+/* FIELDS */
+.field-row{margin-bottom:18px;}
+.field-row:last-child{margin-bottom:0;}
+.field-label{
+  display:block;font-size:12px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;
+}
+.field-label span{color:var(--text);font-size:11px;text-transform:none;letter-spacing:0;margin-left:6px;}
+.field-input{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  color:var(--text);padding:10px 12px;border-radius:6px;font-size:14px;
+  outline:none;transition:border .2s;font-family:inherit;
+}
+.field-input:focus{border-color:var(--accent);}
+.field-textarea{resize:vertical;min-height:70px;line-height:1.5;}
+.field-row .hint{font-size:11px;color:var(--muted);margin-top:4px;}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.field-grid{grid-template-columns:1fr;}}
+
+/* GITHUB TAB */
+.github-status{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;border-radius:8px;border:1px solid var(--border);
+  margin-bottom:20px;font-size:14px;
+}
+.github-status.ok{border-color:var(--green);background:rgba(39,174,96,.08);color:var(--green);}
+.github-status.error{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c;}
+.github-status.idle{color:var(--muted);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  background:#222;border:1px solid var(--border);border-radius:10px;
+  padding:14px 20px;font-size:14px;max-width:320px;
+  transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;
+  display:flex;align-items:center;gap:10px;
+}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.success{border-color:var(--green);color:var(--green);}
+#toast.error{border-color:#e74c3c;color:#e74c3c);}
+#toast.info{border-color:var(--gold);color:var(--gold);}
+
+/* PUBLISH PROGRESS */
+.publish-log{
+  background:var(--input-bg);border:1px solid var(--border);border-radius:8px;
+  padding:14px;font-size:13px;font-family:monospace;line-height:1.8;
+  max-height:200px;overflow-y:auto;margin-top:16px;display:none;color:#aaa;
+}
+.log-ok{color:var(--green);}
+.log-err{color:#e74c3c;}
+.log-info{color:var(--gold);}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .topbar-title{font-size:15px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🧦</div>
+    <div class="login-title">Панель управления</div>
+    <div class="login-sub">КЛЕТОЧКА · Администратор</div>
+    <input type="password" id="loginPass" class="login-input" placeholder="Пароль" autofocus>
+    <button class="btn-login" onclick="doLogin()">Войти</button>
+    <div class="login-error" id="loginError">Неверный пароль</div>
+    <div class="login-hint">По умолчанию: <b>admin</b></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;flex-direction:row;min-height:100vh;">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">🧦 КЛЕТОЧКА</div>
+      <div class="sidebar-sub">Система управления</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="switchTab('prices')">
+        <span class="nav-icon">💰</span> Цены
+      </div>
+      <div class="nav-item" onclick="switchTab('texts')">
+        <span class="nav-icon">✏️</span> Тексты
+      </div>
+      <div class="nav-item" onclick="switchTab('stats')">
+        <span class="nav-icon">📊</span> Статистика
+      </div>
+      <div class="nav-item" onclick="switchTab('contacts')">
+        <span class="nav-icon">📞</span> Контакты
+      </div>
+      <div class="nav-item" onclick="switchTab('github')">
+        <span class="nav-icon">🔧</span> GitHub / Публикация
+      </div>
+      <div class="nav-item" onclick="switchTab('password')">
+        <span class="nav-icon">🔐</span> Сменить пароль
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">Выйти</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Цены</div>
+      <div class="topbar-actions">
+        <a href="index.html" target="_blank" class="btn-preview">👁 Просмотр сайта</a>
+        <button class="btn-publish" onclick="publishToGitHub()" id="btnPublish">🚀 Опубликовать</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PRICES TAB -->
+      <div class="tab-panel active" id="tab-prices">
+
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">👖</span>
+            <h3>Трусы — цены</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-grid">
+              <div class="field-row">
+                <label class="field-label">Цена 1 пары <span>hero</span></label>
+                <input type="text" class="field-input" data-key="hero_new_price" placeholder="390 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Старая цена <span>hero</span></label>
+                <input type="text" class="field-input" data-key="hero_old_price" placeholder="было 690 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пояснение к цене</label>
+                <input type="text" class="field-input" data-key="hero_price_note" placeholder="за одну пару · доставка от 2 дней">
+              </div>
+              <div class="field-row"></div>
+              <div class="field-row">
+                <label class="field-label">Пакет 1 пара — цена</label>
+                <input type="text" class="field-input" data-key="pack1_price" placeholder="390 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пакет 1 пара — старая цена</label>
+                <input type="text" class="field-input" data-key="pack1_old_price" placeholder="690 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пакет 3 пары — цена</label>
+                <input type="text" class="field-input" data-key="pack3_price" placeholder="990 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пакет 3 пары — старая цена</label>
+                <input type="text" class="field-input" data-key="pack3_old_price" placeholder="2 070 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пакет 5 пар — цена</label>
+                <input type="text" class="field-input" data-key="offer_new_price" placeholder="1 690 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Пакет 5 пар — старая цена</label>
+                <input type="text" class="field-input" data-key="offer_old_price" placeholder="было 3 450 ₽">
+              </div>
+            </div>
+            <div class="field-row">
+              <label class="field-label">Примечание к пакету 5 пар</label>
+              <input type="text" class="field-input" data-key="offer_note" placeholder="экономия 1 760 ₽ · 338 ₽ за пару">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">👙</span>
+            <h3>Лифчики — цены</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-grid">
+              <div class="field-row">
+                <label class="field-label">Цена лифчика</label>
+                <input type="text" class="field-input" data-key="bra_price" placeholder="299 ₽">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Старая цена лифчика</label>
+                <input type="text" class="field-input" data-key="bra_old_price" placeholder="590 ₽">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TEXTS TAB -->
+      <div class="tab-panel" id="tab-texts">
+
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">📢</span>
+            <h3>Строка акций (вверху страницы)</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <label class="field-label">Текст объявления</label>
+              <textarea class="field-input field-textarea" data-key="announcement" placeholder="🔥 АКЦИЯ: ..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">🦸</span>
+            <h3>Главный экран (Hero)</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <label class="field-label">Бейдж над заголовком</label>
+              <input type="text" class="field-input" data-key="hero_badge" placeholder="⭐ Выбор 47 000+ довольных покупателей">
+            </div>
+            <div class="field-row">
+              <label class="field-label">Подзаголовок (красная строка)</label>
+              <input type="text" class="field-input" data-key="hero_title" placeholder="— Легенда комфорта">
+            </div>
+            <div class="field-row">
+              <label class="field-label">Описание под заголовком</label>
+              <textarea class="field-input field-textarea" data-key="hero_sub" placeholder="Семейные трусы в классическую клетку..."></textarea>
+              <p class="hint">HTML разрешён: &lt;br&gt; для переноса строки</p>
+            </div>
+            <div class="field-row">
+              <label class="field-label">Текст кнопки CTA</label>
+              <input type="text" class="field-input" data-key="hero_cta" placeholder="ХОЧУ СВОЮ КЛЕТОЧКУ">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STATS TAB -->
+      <div class="tab-panel" id="tab-stats">
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">📊</span>
+            <h3>Счётчики доверия</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-grid">
+              <div class="field-row">
+                <label class="field-label">Покупателей — число</label>
+                <input type="text" class="field-input" data-key="stat_customers" placeholder="47 000+">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Покупателей — подпись</label>
+                <input type="text" class="field-input" data-key="stat_customers_label" placeholder="довольных покупателей">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Рейтинг — число</label>
+                <input type="text" class="field-input" data-key="stat_rating" placeholder="4.9★">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Рейтинг — подпись</label>
+                <input type="text" class="field-input" data-key="stat_rating_label" placeholder="средняя оценка">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Лет на рынке — число</label>
+                <input type="text" class="field-input" data-key="stat_years" placeholder="12 лет">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Лет на рынке — подпись</label>
+                <input type="text" class="field-input" data-key="stat_years_label" placeholder="на рынке">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Повторных покупок — число</label>
+                <input type="text" class="field-input" data-key="stat_repeat" placeholder="98%">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Повторных покупок — подпись</label>
+                <input type="text" class="field-input" data-key="stat_repeat_label" placeholder="повторных покупок">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACTS TAB -->
+      <div class="tab-panel" id="tab-contacts">
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">📞</span>
+            <h3>Контактная информация</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <label class="field-label">Телефон <span>(отображается в футере и кнопках заказа)</span></label>
+              <input type="text" class="field-input" data-key="contact_phone" placeholder="8-800-123-45-67">
+            </div>
+            <div class="field-row">
+              <label class="field-label">Email</label>
+              <input type="text" class="field-input" data-key="contact_email" placeholder="info@kletochka.ru">
+            </div>
+            <div class="field-row">
+              <label class="field-label">Юридическое название (футер)</label>
+              <input type="text" class="field-input" data-key="contact_company" placeholder="ИП Иванов И.И. · ОГРНИП ... · Россия">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GITHUB TAB -->
+      <div class="tab-panel" id="tab-github">
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">🔑</span>
+            <h3>Настройки GitHub</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div id="ghStatus" class="github-status idle">
+              <span class="status-dot"></span>
+              <span id="ghStatusText">Не подключён</span>
+            </div>
+            <div class="field-row">
+              <label class="field-label">Personal Access Token <span>(хранится только в браузере)</span></label>
+              <input type="password" id="ghToken" class="field-input" placeholder="ghp_xxxxxxxxxxxx">
+              <p class="hint">Нужен токен с правом на запись в репозиторий. <b>Settings → Developer settings → Personal access tokens → Classic</b>. Разрешения: repo.</p>
+            </div>
+            <div class="field-grid">
+              <div class="field-row">
+                <label class="field-label">Владелец репозитория</label>
+                <input type="text" id="ghOwner" class="field-input" placeholder="skyfed21-sys">
+              </div>
+              <div class="field-row">
+                <label class="field-label">Название репозитория</label>
+                <input type="text" id="ghRepo" class="field-input" placeholder="kletochka-landing">
+              </div>
+            </div>
+            <button class="btn-publish" style="width:auto;" onclick="saveGithubSettings()">Сохранить настройки</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">🚀</span>
+            <h3>Публикация изменений</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <p style="color:var(--muted);font-size:14px;margin-bottom:16px;line-height:1.6;">
+              Нажмите кнопку ниже, чтобы сохранить все изменения в GitHub.<br>
+              Сайт обновится автоматически через 1–2 минуты.
+            </p>
+            <button class="btn-publish" onclick="publishToGitHub()" id="btnPublish2">🚀 Опубликовать на сайт</button>
+            <div class="publish-log" id="publishLog"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSWORD TAB -->
+      <div class="tab-panel" id="tab-password">
+        <div class="section-card">
+          <div class="section-head" onclick="toggleSection(this)">
+            <span class="icon">🔐</span>
+            <h3>Смена пароля администратора</h3>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <label class="field-label">Новый пароль</label>
+              <input type="password" id="newPass1" class="field-input" placeholder="Введите новый пароль">
+            </div>
+            <div class="field-row">
+              <label class="field-label">Повторите новый пароль</label>
+              <input type="password" id="newPass2" class="field-input" placeholder="Повторите пароль">
+            </div>
+            <button class="btn-publish" style="width:auto;" onclick="changePassword()">Сохранить пароль</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+const TABS = {
+  'prices':'Цены',
+  'texts':'Тексты',
+  'stats':'Статистика',
+  'contacts':'Контакты',
+  'github':'GitHub / Публикация',
+  'password':'Смена пароля'
+};
+
+// ─── AUTH ───────────────────────────────────────────────
+function getStoredPassword(){
+  return localStorage.getItem('cms_password') || 'admin';
+}
+function doLogin(){
+  const pass = document.getElementById('loginPass').value;
+  if(pass === getStoredPassword()){
+    localStorage.setItem('cms_logged_in','1');
+    document.getElementById('loginScreen').style.display='none';
+    const app = document.getElementById('app');
+    app.style.display='flex';
+    init();
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',2000);
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{
+  if(e.key==='Enter') doLogin();
+});
+function doLogout(){
+  localStorage.removeItem('cms_logged_in');
+  location.reload();
+}
+function changePassword(){
+  const p1 = document.getElementById('newPass1').value.trim();
+  const p2 = document.getElementById('newPass2').value.trim();
+  if(!p1){toast('Введите пароль','error');return;}
+  if(p1!==p2){toast('Пароли не совпадают','error');return;}
+  localStorage.setItem('cms_password',p1);
+  toast('Пароль изменён ✓','success');
+  document.getElementById('newPass1').value='';
+  document.getElementById('newPass2').value='';
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el,i)=>{
+    el.classList.toggle('active', Object.keys(TABS)[i]===name);
+  });
+  document.getElementById('topbarTitle').textContent = TABS[name];
+}
+
+// ─── SECTION TOGGLE ──────────────────────────────────────
+function toggleSection(head){
+  head.classList.toggle('collapsed');
+  head.nextElementSibling.classList.toggle('collapsed');
+}
+
+// ─── DATA ────────────────────────────────────────────────
+let currentData = {};
+
+function loadFields(){
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    const key = el.dataset.key;
+    if(currentData[key]!==undefined){
+      // Strip HTML tags for display in plain inputs
+      if(el.tagName==='TEXTAREA'){
+        el.value = currentData[key];
+      } else {
+        el.value = (currentData[key]+'').replace(/<[^>]+>/g,'').trim();
+      }
+    }
+  });
+}
+
+function collectData(){
+  const out = Object.assign({},currentData);
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    const key = el.dataset.key;
+    // For new-price fields that have inner HTML, preserve span wrapper if needed
+    if(key==='hero_new_price' && !el.value.includes('<span>')){
+      out[key] = '<span>всего </span>'+el.value.trim();
+    } else if(key==='offer_new_price' && !el.value.includes('<span>')){
+      out[key] = '<span>всего </span>'+el.value.trim();
+    } else {
+      out[key] = el.value.trim();
+    }
+  });
+  return out;
+}
+
+// ─── GITHUB ──────────────────────────────────────────────
+function getGHSettings(){
+  return {
+    token: localStorage.getItem('gh_token')||'',
+    owner: localStorage.getItem('gh_owner')||'skyfed21-sys',
+    repo:  localStorage.getItem('gh_repo') ||'kletochka-landing'
+  };
+}
+function saveGithubSettings(){
+  const token = document.getElementById('ghToken').value.trim();
+  const owner = document.getElementById('ghOwner').value.trim();
+  const repo  = document.getElementById('ghRepo').value.trim();
+  if(token) localStorage.setItem('gh_token',token);
+  if(owner) localStorage.setItem('gh_owner',owner);
+  if(repo)  localStorage.setItem('gh_repo',repo);
+  toast('Настройки сохранены','success');
+  updateGHStatus('ok','Настройки сохранены');
+}
+
+function updateGHStatus(type,msg){
+  const el = document.getElementById('ghStatus');
+  el.className='github-status '+type;
+  document.getElementById('ghStatusText').textContent=msg;
+}
+
+async function getFileSha(owner,repo,path,token){
+  const r = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    {headers:{Authorization:'token '+token,'Accept':'application/vnd.github.v3+json'}}
+  );
+  if(!r.ok) return null;
+  const d = await r.json();
+  return d.sha;
+}
+
+function log(msg,type=''){
+  const box = document.getElementById('publishLog');
+  box.style.display='block';
+  const line = document.createElement('div');
+  line.className = type ? 'log-'+type : '';
+  line.textContent = msg;
+  box.appendChild(line);
+  box.scrollTop=box.scrollHeight;
+}
+
+async function publishToGitHub(){
+  const gh = getGHSettings();
+  if(!gh.token){
+    toast('Сначала укажите GitHub токен во вкладке «GitHub»','error');
+    switchTab('github');
+    return;
+  }
+  const btn1=document.getElementById('btnPublish');
+  const btn2=document.getElementById('btnPublish2');
+  const setDisabled=(v)=>{if(btn1)btn1.disabled=v;if(btn2)btn2.disabled=v;};
+  setDisabled(true);
+  document.getElementById('publishLog').innerHTML='';
+
+  const data = collectData();
+  log('📦 Подготовка данных...','info');
+
+  try {
+    // Get SHA of existing data.json
+    log('🔍 Получение текущего файла...','info');
+    const sha = await getFileSha(gh.owner,gh.repo,'data.json',gh.token);
+
+    // Encode content
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+
+    const body = {
+      message: 'Обновление контента через CMS — '+new Date().toLocaleString('ru'),
+      content: content
+    };
+    if(sha) body.sha = sha;
+
+    log('🚀 Отправка изменений в GitHub...','info');
+    const r = await fetch(
+      `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/data.json`,
+      {
+        method:'PUT',
+        headers:{
+          Authorization:'token '+gh.token,
+          'Accept':'application/vnd.github.v3+json',
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify(body)
+      }
+    );
+
+    if(!r.ok){
+      const err = await r.json();
+      throw new Error(err.message||'Ошибка '+r.status);
+    }
+
+    log('✅ data.json успешно обновлён!','ok');
+    log('⏳ Сайт обновится через 1–2 минуты...','info');
+    log('🌐 https://'+gh.owner+'.github.io/'+gh.repo+'/','ok');
+    updateGHStatus('ok','Опубликовано ✓');
+    toast('Опубликовано! Сайт обновится через ~1 мин ✓','success');
+    currentData = data;
+  } catch(e){
+    log('❌ Ошибка: '+e.message,'err');
+    updateGHStatus('error','Ошибка: '+e.message);
+    toast('Ошибка: '+e.message,'error');
+  }
+  setDisabled(false);
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+let toastTimer;
+function toast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='show '+(type||'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.className='',3200);
+}
+
+// ─── INIT ────────────────────────────────────────────────
+async function init(){
+  const gh = getGHSettings();
+
+  // Fill GitHub settings fields
+  if(document.getElementById('ghToken'))
+    document.getElementById('ghToken').value = gh.token ? '••••••••••••••••' : '';
+  if(document.getElementById('ghOwner'))
+    document.getElementById('ghOwner').value = gh.owner;
+  if(document.getElementById('ghRepo'))
+    document.getElementById('ghRepo').value = gh.repo;
+
+  // Try to load data.json from GitHub
+  if(gh.token){
+    try{
+      updateGHStatus('idle','Загрузка данных...');
+      const r = await fetch(
+        `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/data.json`,
+        {headers:{Authorization:'token '+gh.token,'Accept':'application/vnd.github.v3+json'}}
+      );
+      if(r.ok){
+        const d = await r.json();
+        currentData = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+        loadFields();
+        updateGHStatus('ok','Подключён · '+gh.owner+'/'+gh.repo);
+      } else {
+        throw new Error('Файл не найден');
+      }
+    } catch(e){
+      updateGHStatus('error','Ошибка загрузки: '+e.message);
+      loadFallback();
+    }
+  } else {
+    loadFallback();
+    updateGHStatus('idle','Токен не задан — укажите во вкладке GitHub');
+  }
+}
+
+function loadFallback(){
+  // Load from local data.json as fallback
+  fetch('data.json?v='+Date.now())
+    .then(r=>r.json())
+    .then(d=>{currentData=d;loadFields();})
+    .catch(()=>{});
+}
+
+// Auto-check login
+if(localStorage.getItem('cms_logged_in')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  const app = document.getElementById('app');
+  app.style.display='flex';
+  init();
+}
+</script>
+</body>
+</html>
